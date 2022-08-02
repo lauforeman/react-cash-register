@@ -11,3 +11,11 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.product-table tr.odd {
+  background-color: aquamarine;
+}
+
+.product-table tr.even {
+  background-color: lightblue;
+}
