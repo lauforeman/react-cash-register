@@ -4,7 +4,7 @@ import { API } from '../config/contants';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Product } from './ProductList';
 
-export interface ProductForm {
+export interface ProductFormField {
     productId?: number;
     name: string;
     salePrice: number;
@@ -18,7 +18,7 @@ export default function ProductForm() {
 
     const {id} = useParams();
 
-    const[productForm, setProductForm] = React.useState<ProductForm>({
+    const[productForm, setProductForm] = React.useState<ProductFormField>({
         buyPrice: 0,
         quantity: 0,
         name: '',
