@@ -56,7 +56,9 @@ export default function ProductList() {
                             <td>{product.quantity}</td>
                             <td>{product.isActive ? 'Yes' : 'No'}</td>
                             <td>
-                                <button>Edit</button>
+                                 <NavLink to={`/products/product/${product.productId}`}>
+                                     <button>Edit</button>
+                                 </NavLink>
                                 <button>{product.isActive ? 'Deactivate' : 'Activate'}</button>
                             </td>
                         </tr>
