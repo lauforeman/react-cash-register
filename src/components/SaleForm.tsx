@@ -2,10 +2,9 @@ import React from 'react';
 import axios from 'axios';
 import Select from 'react-select';
 import { API } from '../config/contants';
-import { NavLink, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Sale } from './SaleList';
 import { Product } from './ProductList';
-import { parse } from 'path';
 
 export interface ProductOption extends Product {
     label: string;
@@ -34,6 +33,8 @@ export default function SaleForm() {
     const navigate = useNavigate();
 
     const { id } = useParams();
+
+    const [editMode, setEditMode] = React.useState(false);
 
     const [products, setProducts] = React.useState<ReadonlyArray<ProductOption>>([]);
 
@@ -98,9 +99,10 @@ export default function SaleForm() {
     React.useEffect(() => {
         getProducts();
         if (id) {
+            setEditMode(true);
             getSale();
         }
-    }, [id, getSale, getProducts])
+    }, [id, getSale, getProducts, setEditMode])
 
     const onSaveClick = () => {
         if (id) {
@@ -127,10 +129,10 @@ export default function SaleForm() {
     return (
         <form className='sale-form'>
             <div className='sale-form-header'>
-                <h3>Register Sale</h3>
+                <h3>{editMode ? 'Edit' : 'Register'} Sale</h3>
             </div>
             <div className="sale-form-main">
-                {id &&
+                {editMode &&
                     (
                         <div className="form-field">
                             <label htmlFor='SaleId'>Sale Id</label>
@@ -143,6 +145,7 @@ export default function SaleForm() {
                     <div className="form-group-header">
                         <div className="form-title">Products</div>
                         <button
+                            disabled={editMode}
                             type='button'
                             onClick={() => setSaleForm({
                                 ...saleForm,
@@ -158,6 +161,7 @@ export default function SaleForm() {
                         {saleForm.productSales.map((productSale, index) => (
                             <div key={index} className="form-field">
                                 <Select
+                                    isDisabled={editMode}
                                     className='Select'
                                     options={products}
                                     value={products.find(p => p.productId === productSale.productId)}
@@ -172,6 +176,7 @@ export default function SaleForm() {
                                     className='medium'
                                     value={productSale.price || 0} />
                                 <input
+                                    disabled={editMode}
                                     className='tiny'
                                     min={1}
                                     type="number"
@@ -181,6 +186,7 @@ export default function SaleForm() {
                                     })}
                                 />
                                 <button
+                                    disabled={editMode}
                                     type='button'
                                     onClick={() => setSaleForm({
                                         ...saleForm,
@@ -200,30 +206,33 @@ export default function SaleForm() {
                     <input readOnly type="number" value={saleForm.total} />
                 </div>
                 <div className="form-field">
-                    <label>Payment</label>
-                    <input type="number" min={0} value={saleForm.payment} onChange={(e) =>
-                        setSaleForm({
-                            ...saleForm,
-                            payment: parseInt(e.target.value),
-                            change: parseInt(e.target.value) - (saleForm.total || 0)
-                        })} />
-                </div>
-                <div className="form-field">
-                    <label>Change</label>
-                    <input readOnly type="number" value={saleForm.change} />
-                </div>
-                <div className="form-field">
                     <label>Is Loan?</label>
-                    <input type="checkbox" checked={saleForm.isLoan} onChange={(e) =>
+                    <input disabled={editMode} type="checkbox" checked={saleForm.isLoan} onChange={(e) =>
                         setSaleForm({
                             ...saleForm,
                             isLoan: e.target.checked
                         })} />
                 </div>
+                {(!saleForm.isLoan || editMode) && (
+                    <React.Fragment>
+                        <div className="form-field">
+                            <label>Payment</label>
+                            <input type="number" min={0} value={saleForm.payment} onChange={(e) =>
+                                setSaleForm({
+                                    ...saleForm,
+                                    payment: parseInt(e.target.value),
+                                    change: parseInt(e.target.value) - (saleForm.total || 0)
+                                })} />
+                        </div>
+                        <div className="form-field">
+                            <label>Change</label>
+                            <input readOnly type="number" value={saleForm.change} />
+                        </div>
+                    </React.Fragment>)}
                 {saleForm.isLoan && (
                     <div className="form-field">
                         <label>Apartment Number</label>
-                        <input type="text" value={saleForm.apartmentNumber} onChange={(e) =>
+                        <input disabled={editMode} type="text" value={saleForm.apartmentNumber} onChange={(e) =>
                             setSaleForm({
                                 ...saleForm,
                                 apartmentNumber: e.target.value
