@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import { API } from '../config/contants';
 import { NavLink } from 'react-router-dom';
+import Loading from 'react-loading';
 
 export interface Product {
     productId: number;
@@ -13,18 +14,22 @@ export interface Product {
 }
 
 export default function ProductList() {
+
     const[products, setProducts] = React.useState<ReadonlyArray<Product>>([]);
 
+    const[isLoading, setLoading] = React.useState<boolean>(false);
+
+
     const getProducts = React.useCallback(async () => {
+        setLoading(true);
         try {
             const response = await axios.get<ReadonlyArray<Product>>(`${API}/Product`)
             setProducts(response.data);
-        } catch (error) {
-            
+        } catch (error) { 
             console.error(error);
         }
-        
-    }, [setProducts]);
+        setLoading(false);
+    }, [setProducts, setLoading]);
 
     const toggleProduct = React.useCallback(async (id: number) => {
         try {
@@ -83,8 +88,11 @@ export default function ProductList() {
                         ))
                     ) : (
                         <tr>
-                            <td className='center'>
-                                No Data Available
+                            <td colSpan={8} className="center"> {isLoading ? (
+                                <Loading type='balls' color='black' className='loading-animation'/>
+                            ) :
+                                <>No Data Available</>
+                            }
                             </td>
                         </tr>
                     )}

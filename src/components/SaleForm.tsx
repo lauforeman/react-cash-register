@@ -44,8 +44,10 @@ export default function SaleForm() {
         payment: 0,
         productSales: [{
             productId: 0,
-            quantity: 1
-        }]
+            quantity: 1,
+            price: 0
+        }],
+        total: 0
     });
 
     const getProducts = React.useCallback(async () => {
@@ -143,19 +145,20 @@ export default function SaleForm() {
 
                 <div className="form-group">
                     <div className="form-group-header">
-                        <div className="form-title">Products</div>
-                        <button
-                            disabled={editMode}
-                            type='button'
-                            onClick={() => setSaleForm({
-                                ...saleForm,
-                                productSales: [
-                                    ...saleForm.productSales,
-                                    { productId: 0, quantity: 1 }
-                                ]
-                            })}>
-                            +
-                        </button>
+                        <div className="form-title">Products
+                            <button
+                                disabled={editMode}
+                                type='button'
+                                onClick={() => setSaleForm({
+                                    ...saleForm,
+                                    productSales: [
+                                        ...saleForm.productSales,
+                                        { productId: 0, quantity: 1 }
+                                    ]
+                                })}>
+                                +
+                            </button>
+                        </div>
                     </div>
                     <div className="form-group-body">
                         {saleForm.productSales.map((productSale, index) => (

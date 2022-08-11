@@ -3,6 +3,7 @@ import axios from 'axios';
 import { API } from '../config/contants';
 import { NavLink } from 'react-router-dom';
 import { Product } from './ProductList';
+import Loading from 'react-loading';
 
 type Dict<TValue> = {
     [key: string]: TValue
@@ -32,8 +33,11 @@ export default function SaleList() {
 
     const [showDetail, setShowDetail] = React.useState<Dict<boolean>>({});
 
+    const [isLoading, setLoading] = React.useState<boolean>(false);
+
     const getSales = React.useCallback(async () => {
         try {
+            setLoading(true);
             const response = await axios.get<ReadonlyArray<Sale>>(`${API}/Sale`)
             setSales(response.data);
             setShowDetail(response.data.reduce((dict, sale) => ({ ...dict, [sale.saleId]: false }), {} as Dict<boolean>))
@@ -41,8 +45,8 @@ export default function SaleList() {
 
             console.error(error);
         }
-
-    }, [setSales, setShowDetail]);
+        setLoading(false);
+    }, [setSales, setShowDetail, setLoading]);
 
     React.useEffect(() => {
         getSales();
@@ -69,12 +73,12 @@ export default function SaleList() {
                 <tbody>
                     {sales.length > 0 ? (
                         sales.map((sale, index) => (
-                            <React.Fragment>
-                                <tr key={sale.saleId} className={index % 2 === 1 ? 'odd' : 'even'}>
+                            <React.Fragment key={sale.saleId}>
+                                <tr className={index % 2 === 1 ? 'odd' : 'even'}>
                                     <td>
                                         <button onClick={() =>
-                                            setShowDetail({ ...showDetail, [sale.saleId]: !showDetail[sale.saleId]})
-                                            }>{showDetail[sale.saleId] ? '↓' : '→'}</button>
+                                            setShowDetail({ ...showDetail, [sale.saleId]: !showDetail[sale.saleId] })
+                                        }>{showDetail[sale.saleId] ? '↓' : '→'}</button>
                                         {sale.saleId}
                                     </td>
                                     <td>{sale.date}</td>
@@ -89,21 +93,43 @@ export default function SaleList() {
                                         </NavLink>
                                     </td>
                                 </tr>
-                                <tr>
                                     {
                                         showDetail[sale.saleId] && (
                                             <tr>
-                                                <td colSpan={8}> Esto es un detalle</td>
+                                                <td colSpan={8}>
+                                                    <table>
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Product</th>
+                                                                <th>Quantity</th>
+                                                                <th>Price</th>
+                                                                <th>Total</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {sale.productSales.map((productSale, psIndex) => (
+                                                                <tr key={productSale.productSaleId} className={psIndex % 2 === 1 ? 'odd' : 'even'}>
+                                                                    <td>{productSale.product.name}</td>
+                                                                    <td>{productSale.quantity}</td>
+                                                                    <td>{productSale.price}</td>
+                                                                    <td>{productSale.quantity * productSale.price}</td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </td>
                                             </tr>
                                         )
                                     }
-                                </tr>
                             </React.Fragment>
                         ))
                     ) : (
                         <tr>
-                            <td className='center'>
-                                No Data Available
+                            <td colSpan={8} className="center"> {isLoading ? (
+                                <Loading type='balls' color='black' className='loading-animation'/>
+                            ) :
+                                <>No Data Available</>
+                            }
                             </td>
                         </tr>
                     )}
